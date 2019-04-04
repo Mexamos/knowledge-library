@@ -8,8 +8,33 @@ class EditFolder extends Component {
         super(props)
         this.state = {
             new_folder: '',
-            new_note: ''
+            new_note: '',
+            path: ''
         }
+    }
+
+    addFolder (name) {
+        this.props.screenProps.dispatch({
+            type: 'ADD_CHILD', 
+            child: {
+                type: 'folder',
+                name: name,
+                childs: []
+            },
+            path: this.state.path
+        })
+    }
+
+    addNote (name) {
+        this.props.screenProps.dispatch({
+            type: 'ADD_CHILD', 
+            child: {
+                type: 'note',
+                name: name,
+                childs: []
+            },
+            path: this.state.path
+        })
     }
 
     render() {
@@ -19,8 +44,7 @@ class EditFolder extends Component {
         const { navigation } = this.props
         let select_item = navigation.getParam('select_item')
         console.log('select_item', select_item)
-        let childs_indexes = navigation.getParam('childs_indexes')
-        console.log('childs_indexes', childs_indexes)
+        this.state.path = navigation.getParam('childs_indexes')
 
         return (
             <View style={{ flex: 1, height: '100%'}}>
@@ -31,7 +55,10 @@ class EditFolder extends Component {
                         <TouchableOpacity
                         style={{alignItems: 'center', justifyContent: 'center', width: 40}}
                         onPress={() => {
-                            this.props.navigation.navigate('Library')
+                            console.log('go back', this.state.path)
+                            this.props.navigation.navigate('Library', {
+                                'minus_path': this.state.path
+                            })
                         }}>
                             <Image
                             style={{width: 18, height: 18}}
@@ -49,7 +76,12 @@ class EditFolder extends Component {
                         <TouchableOpacity
                         style={{alignItems: 'center', justifyContent: 'center', width: 60, height: 60, right: 0, top: 0, position: 'absolute'}}
                         onPress={() => {
-                            
+                            if(this.state.new_folder.length !== 0) {
+                                this.addFolder(this.state.new_folder)
+                            }
+                            if(this.state.new_note.length !== 0) {
+                                this.addNote(this.state.new_note)
+                            }
                         }}>
                             <Image
                             style={{width: 18, height: 18}}

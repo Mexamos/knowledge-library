@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import { View, Text, TouchableOpacity, Image, Keyboard, TextInput, ScrollView } from 'react-native'
+import { View, Text, TouchableOpacity, Image, Keyboard, TextInput, ScrollView, Dimensions } from 'react-native'
 
 import { saveLibraryToJSON, checkJSONFile } from '../common_functions.js'
 
@@ -20,7 +20,7 @@ class Library extends Component {
         }
     }
 
-    addNote (name) {
+    addFolder (name) {
 
         this.props.screenProps.dispatch({
             type: 'ADD_CHILD', 
@@ -28,7 +28,8 @@ class Library extends Component {
                 type: 'folder',
                 name: name,
                 childs: []
-            }
+            },
+            path: ''
         })
 
         this.forceUpdate()
@@ -106,11 +107,24 @@ class Library extends Component {
 
     render() {
 
+        const { navigation } = this.props
+
+
+        if(navigation.getParam('minus_path') && navigation.getParam('minus_path') !== -1) {
+            console.log('remove path')
+            let path = navigation.getParam('minus_path')
+            navigation.state.params.minus_path = -1
+            
+            console.log('path', path)
+            let length = path.length === 1 ? 0 : -2
+            console.log('length', length)
+            this.state.childs_indexes = this.state.childs_indexes.slice(0, length)
+            console.log('this.state.childs_indexes', this.state.childs_indexes)
+        }
+
         const {
             nextField
         } = this.props;
-
-        console.log('this.props.screenProps.getState().library', this.props.screenProps.getState().library)
 
         if(!this.state.check_JSON) {
             checkJSONFile.call(this)
@@ -118,25 +132,42 @@ class Library extends Component {
 
 
         // Get need folder
-        console.log('this.props.screenProps.getState().library', this.props.screenProps.getState())
-        let need_folder = this.props.screenProps.getState().library.childs
-
-        console.log('this.state.childs_indexes', this.state.childs_indexes)
+        let need_folder = this.props.screenProps.getState().library
+        var return_button = <View></View>
 
         if(this.state.childs_indexes.length > 0) {
             let indexes = this.state.childs_indexes.split('.')
-            console.log('indexes', indexes)
-            indexes.forEach(function(index) {
-                console.log('need_folder', need_folder)
-                need_folder = need_folder[index]
-            })
-            need_folder = need_folder.childs
-        }
 
-        console.log('need_folder', need_folder)
+            console.log('need_folder 1', need_folder)
+
+            indexes.forEach(function(index) {
+                console.log('index', index)
+                need_folder = need_folder.childs[index]
+
+                console.log('need_folder 2', need_folder)
+            })
+            console.log('need_folder', need_folder)
+
+            return_button = <TouchableOpacity
+                            style={{alignItems: 'center', justifyContent: 'center', width: 60, position: 'absolute', height: 60, zIndex: 2}}
+                            onPress={() => {
+                                console.log('go back', )
+
+                                this.state.childs_indexes = this.state.childs_indexes.slice(0, -2)
+                                this.forceUpdate()
+                 
+                            }}>
+                            <Image
+                            style={{width: 18, height: 18}}
+                            source={require('../images/left-arrow.png')}
+                            ></Image>
+                        </TouchableOpacity>
+        }
+        need_folder = need_folder.childs
+
+        
 
         var render_library_list = this.renderLibraryList(need_folder)
-
 
         return (
             <View style={{ flex: 1, height: '100%'}}>
@@ -144,10 +175,13 @@ class Library extends Component {
                 <View>
                     <LinearGradient colors={['#0e4193', '#07234f']} style={{height: 60}}>
 
-                
-                        <View style={{justifyContent: 'center', height: 60, paddingLeft: 20}}>
-                            <Text style={{color:'white', fontSize: 18}}>Library</Text>
+                        <View style={{justifyContent: 'center', height: 60}}>
+                            <Text style={{color:'white', fontSize: 18, textAlign: 'center'}}>Library</Text>
                         </View>
+
+                        {
+                            return_button
+                        }
 
                     </LinearGradient>
 
@@ -188,7 +222,7 @@ class Library extends Component {
 
                 <TouchableOpacity style={{position: 'absolute', bottom: 0, width: '100%', height: this.state.text_input_height}}
                 onPress={() => {
-                    this.addNote(this.state.new_note)
+                    this.addFolder(this.state.new_note)
                     saveLibraryToJSON.call(this)
                     this.state.add_folder_button = 1
                     this.state.text_input_height = 0

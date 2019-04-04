@@ -21,7 +21,30 @@ function reduser(state, action) {
       return state
     }
     case 'ADD_CHILD': {
-      state.library.push(action.child)
+      
+      if(action.path.length === 0) {
+        state.library.childs.push(action.child)
+      }
+      else {
+        let path = action.path.split('.')
+        
+        let need_folder = state.library
+
+        console.log('need_folder 1', need_folder)
+
+        for(let i = 0, length = path.length; i < length; i++) {
+
+          need_folder = need_folder.childs[path[i]]
+
+        }
+
+        need_folder.childs.push(action.child)
+
+        console.log('need_folder 2', need_folder)
+
+      }
+      console.log('state', state)
+
       return state
     }
     case 'DELETE_CHILD': {
