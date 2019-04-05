@@ -31,8 +31,16 @@ class EditFolder extends Component {
             child: {
                 type: 'note',
                 name: name,
-                childs: []
+                description: ''
             },
+            path: this.state.path
+        })
+    }
+
+    renameFolder (name) {
+        this.props.screenProps.dispatch({
+            type: 'RENAME', 
+            name: name,
             path: this.state.path
         })
     }
@@ -76,12 +84,15 @@ class EditFolder extends Component {
                         <TouchableOpacity
                         style={{alignItems: 'center', justifyContent: 'center', width: 60, height: 60, right: 0, top: 0, position: 'absolute'}}
                         onPress={() => {
+                            console.log('select_item', select_item)
                             if(this.state.new_folder.length !== 0) {
                                 this.addFolder(this.state.new_folder)
                             }
                             if(this.state.new_note.length !== 0) {
                                 this.addNote(this.state.new_note)
                             }
+                            this.renameFolder(select_item.name)
+                            this.forceUpdate()
                         }}>
                             <Image
                             style={{width: 18, height: 18}}
@@ -94,10 +105,11 @@ class EditFolder extends Component {
 
 
                 <View
-                style={{width: '100%', justifyContent: 'center', alignItems: 'center', marginBottom: 30}}>
+                style={{width: '100%', justifyContent: 'center', alignItems: 'center', marginBottom: 10}}>
 
                     <TextInput
-                    style={{textAlign: 'center'}}>
+                    style={{textAlign: 'center', width: '100%'}}
+                    onChangeText={(text) => select_item.name = text}>
                         {select_item.name}
                     </TextInput>
     
@@ -108,9 +120,9 @@ class EditFolder extends Component {
                 style={{flexDirection: 'column', justifyContent: 'space-around', height: 200, paddingHorizontal: 20, borderColor: 'green', borderWidth: 1}}>
 
                     <TouchableOpacity
-                        style={{borderWidth: 1, borderColor: 'blue', flexDirection: 'row', alignItems: 'center'}}
+                    style={{flexDirection: 'row', alignItems: 'center'}}
                     >
-                        <LinearGradient colors={['#0e4193', '#07234f']} style={{height: 40, width: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center'}}>
+                        <LinearGradient colors={['#0e4193', '#07234f']} style={{height: 40, width: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginRight: 30}}>
                             <Image
                             style={{width: 18, height: 18}}
                             source={require('../images/add-folder.png')}
@@ -119,21 +131,35 @@ class EditFolder extends Component {
 
                         <TextInput
                         placeholder="Add folder"
-                        style={{textAlign: 'center', borderColor: 'red', borderWidth: 1, width: 300}}
+                        style={{textAlign: 'center', width: 250, borderBottomColor: '#0e4193', borderBottomWidth: 1}}
                         onChangeText={(text) => this.state.new_folder = text}
                         />
 
 
                     </TouchableOpacity>
 
-                    <LinearGradient colors={['#0e4193', '#07234f']} style={{height: 40, width: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center'}}>
+                    <TouchableOpacity
+                    style={{flexDirection: 'row', alignItems: 'center'}}
+                    >
 
-                        <Image
-                        style={{width: 18, height: 18}}
-                        source={require('../images/add-note.png')}
-                        ></Image>
+                        <LinearGradient colors={['#0e4193', '#07234f']} style={{height: 40, width: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginRight: 30}}>
+                            <Image
+                            style={{width: 18, height: 18}}
+                            source={require('../images/add-note.png')}
+                            ></Image>
+                        </LinearGradient>
 
-                    </LinearGradient>
+                        <TextInput
+                        placeholder="Add note"
+                        style={{textAlign: 'center', width: 250, borderBottomColor: '#0e4193', borderBottomWidth: 1}}
+                        onChangeText={(text) => this.state.new_note = text}
+                        />
+
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                    style={{width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20}}
+                    >
 
                     <LinearGradient colors={['#0e4193', '#07234f']} style={{height: 40, width: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center'}}>
 
@@ -143,6 +169,9 @@ class EditFolder extends Component {
                         ></Image>
 
                     </LinearGradient>
+
+
+                    </TouchableOpacity>
 
                 </View>
 

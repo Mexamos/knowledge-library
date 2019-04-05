@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
 import { View, Text, TouchableOpacity, Image, Keyboard, TextInput, ScrollView, Dimensions } from 'react-native'
 
-import { saveLibraryToJSON, checkJSONFile } from '../common_functions.js'
+import { checkJSONFile } from '../common_functions.js'
 
 import LinearGradient from 'react-native-linear-gradient'
 var objectPath = require("object-path")
@@ -21,7 +21,6 @@ class Library extends Component {
     }
 
     addFolder (name) {
-
         this.props.screenProps.dispatch({
             type: 'ADD_CHILD', 
             child: {
@@ -31,12 +30,10 @@ class Library extends Component {
             },
             path: ''
         })
-
         this.forceUpdate()
     }
 
     editPathIndexes (action, index) {
-
         if(action === 'add') {
             if(this.state.childs_indexes.length === 0) {
                 this.state.childs_indexes = `${index}`
@@ -48,12 +45,13 @@ class Library extends Component {
         else if(action === 'delete') {
 
         }
-
     }
 
     renderLibraryList (childs) {
         let result = <View style={{width: '100%', height: '100%'}}><ScrollView>
             {childs.map((child, index) => {
+                console.log('child', child)
+                if(child.type === 'folder') {
                 return(
                     <View 
                     key={index}
@@ -92,6 +90,39 @@ class Library extends Component {
                         </TouchableOpacity>
                     </View>
                 )
+                }
+                else {
+                    return(
+                        <View 
+                        key={index}
+                        style={{height: 40, marginLeft: 10, marginRight: 5, marginTop: 10, flexDirection: 'row', paddingVertical: 5}}>
+
+
+                            <View
+                            style={{width: 20, alignItems: 'center', justifyContent: 'center'}}>
+                                <Text style={{color: 'black', textAlign: 'center'}}>
+                                    {'-'}
+                                </Text>
+                            </View>
+
+                            <TouchableOpacity
+                            onPress={() => {
+    
+                                // console.log('this.state.childs_indexes', this.state.childs_indexes)
+                                // console.log('go to select folder')
+                                // this.editPathIndexes('add', index)
+    
+                                // this.forceUpdate()
+                            }}
+                            style={{height: '100%', justifyContent: 'center', width: 325, borderColor: '#07234f', borderWidth: 1, borderRadius: 1, paddingLeft: 10}}>
+                                <Text style={{color: 'black'}}>
+                                    {child.name}
+                                </Text>
+                            </TouchableOpacity>
+                            
+                        </View>
+                    )
+                }
             })}
         </ScrollView></View>
         return result
@@ -111,15 +142,8 @@ class Library extends Component {
 
 
         if(navigation.getParam('minus_path') && navigation.getParam('minus_path') !== -1) {
-            console.log('remove path')
-            let path = navigation.getParam('minus_path')
             navigation.state.params.minus_path = -1
-            
-            console.log('path', path)
-            let length = path.length === 1 ? 0 : -2
-            console.log('length', length)
-            this.state.childs_indexes = this.state.childs_indexes.slice(0, length)
-            console.log('this.state.childs_indexes', this.state.childs_indexes)
+            this.state.childs_indexes = this.state.childs_indexes.slice(0, -2)
         }
 
         const {
@@ -223,7 +247,6 @@ class Library extends Component {
                 <TouchableOpacity style={{position: 'absolute', bottom: 0, width: '100%', height: this.state.text_input_height}}
                 onPress={() => {
                     this.addFolder(this.state.new_note)
-                    saveLibraryToJSON.call(this)
                     this.state.add_folder_button = 1
                     this.state.text_input_height = 0
                     Keyboard.dismiss()

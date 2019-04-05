@@ -5,6 +5,7 @@ import Library from './pages/Library'
 import EditFolder from './pages/EditFolder'
 
 import { createStore } from 'redux'
+import { saveLibraryToJSON } from './common_functions.js'
 
 const initialState = {
   library: {
@@ -14,47 +15,44 @@ const initialState = {
 
 function reduser(state, action) {
 
+  function getNeedFolder (state, action) {
+    let path = action.path.split('.')
+    let need_folder = state.library
+
+    for(let i = 0, length = path.length; i < length; i++) {
+      need_folder = need_folder.childs[path[i]]
+    }
+    return need_folder
+  }
+
   switch (action.type) {
     case 'INITIATE_LIBRARY': {
-      console.log('action.library', action.library)
-      state.library.childs = action.library
+      state.library = action.library.library
       return state
     }
     case 'ADD_CHILD': {
-      
       if(action.path.length === 0) {
         state.library.childs.push(action.child)
       }
       else {
-        let path = action.path.split('.')
-        
-        let need_folder = state.library
-
-        console.log('need_folder 1', need_folder)
-
-        for(let i = 0, length = path.length; i < length; i++) {
-
-          need_folder = need_folder.childs[path[i]]
-
-        }
-
+        let need_folder = getNeedFolder(state, action)
         need_folder.childs.push(action.child)
-
-        console.log('need_folder 2', need_folder)
-
       }
-      console.log('state', state)
-
+      saveLibraryToJSON(state)
       return state
     }
     case 'DELETE_CHILD': {
       return state.count - action.amount
     }
     case 'RENAME': {
-      return state.count - action.amount
+      let need_folder = getNeedFolder(state, action)
+      need_folder.name = action.name
+      saveLibraryToJSON(state)
+      return state
     }
     default: return state
   }
+
 }
 
 const store = createStore(reduser, initialState)
