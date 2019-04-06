@@ -2,40 +2,16 @@ import React, {Component} from 'react'
 import { Button, View, Text, TouchableOpacity, Image, Keyboard, TextInput, ScrollView, FlatList } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient';
 
-class EditFolder extends Component {
+class EditNote extends Component {
 
-    constructor(props) {
-        super(props)
-        this.state = {
-            new_folder: '',
-            new_note: '',
-            path: ''
-        }
-    }
-
-    addFolder (name) {
-        this.props.screenProps.dispatch({
-            type: 'ADD_CHILD', 
-            child: {
-                type: 'folder',
-                name: name,
-                childs: []
-            },
-            path: this.state.path
-        })
-    }
-
-    addNote (name) {
-        this.props.screenProps.dispatch({
-            type: 'ADD_CHILD', 
-            child: {
-                type: 'note',
-                name: name,
-                description: ''
-            },
-            path: this.state.path
-        })
-    }
+    // constructor(props) {
+    //     super(props)
+    //     this.state = {
+    //         new_folder: '',
+    //         new_note: '',
+    //         path: ''
+    //     }
+    // }
 
     renameFolder (name) {
         this.props.screenProps.dispatch({
@@ -45,36 +21,18 @@ class EditFolder extends Component {
         })
     }
 
-    deleteFolder () {
-        let delete_path = this.state.path.substr(this.state.path.length - 1)
-        let parent_path = this.state.path.slice(0, -2)
-
-        this.props.screenProps.dispatch({
-            type: 'DELETE_CHILD',
-            delete_path: delete_path,
-            path: parent_path
-        })
-
-        this.props.navigation.navigate('Library', {
-            'minus_path': this.state.path
-        })
-    }
-
     render() {
-
-        const { navigation } = this.props
-        let select_item = navigation.getParam('select_item')
-        this.state.path = navigation.getParam('childs_indexes')
 
         return (
             <View style={{ flex: 1, height: '100%'}}>
                 
-                <View>
+                {/* <View>
                     <LinearGradient colors={['#0e4193', '#07234f']} style={{height: 60, flexDirection: 'row'}}>
 
                         <TouchableOpacity
                         style={{alignItems: 'center', justifyContent: 'center', width: 40}}
                         onPress={() => {
+                            console.log('go back', this.state.path)
                             this.props.navigation.navigate('Library', {
                                 'minus_path': this.state.path
                             })
@@ -172,11 +130,6 @@ class EditFolder extends Component {
                     style={{width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20}}
                     >
 
-                    <TouchableOpacity
-                    onPress={() => {
-                        console.log('remove')
-                        this.deleteFolder()
-                    }}>
                     <LinearGradient colors={['#0e4193', '#07234f']} style={{height: 40, width: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center'}}>
 
                         <Image
@@ -185,16 +138,15 @@ class EditFolder extends Component {
                         ></Image>
 
                     </LinearGradient>
-                    </TouchableOpacity>
 
 
                     </TouchableOpacity>
 
-                </View>
+                </View> */}
 
             </View>
         )
     }
 }
 
-export default EditFolder
+export default EditNote
