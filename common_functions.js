@@ -2,9 +2,6 @@ var RNFS = require('react-native-fs')
 var path = RNFS.ExternalStorageDirectoryPath + '/Fukurokuju.json';
 
 let saveLibraryToJSON = function (state) {
-
-    console.log('saveLibraryToJSON state', state)
-
     RNFS.writeFile(path, JSON.stringify(state), 'utf8')
     .then(() => {
       console.log('FILE WRITTEN!')
@@ -12,7 +9,6 @@ let saveLibraryToJSON = function (state) {
     .catch((err) => {
       console.log(err.message)
     })
-    
 }
 
 function checkJSONFile () {

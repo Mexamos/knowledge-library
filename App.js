@@ -1,8 +1,10 @@
 import React, {Component} from 'react'
 import { createAppContainer, createStackNavigator } from 'react-navigation'
+
 import Library from './pages/Library'
 import EditFolder from './pages/EditFolder'
 import EditNote from './pages/EditNote'
+
 import { createStore } from 'redux'
 import { saveLibraryToJSON } from './common_functions.js'
 
@@ -41,7 +43,6 @@ function reduser(state, action) {
       return state
     }
     case 'DELETE_CHILD': {
-
       if(action.path.length === 0) {
         state.library.childs.splice(action.delete_path , 1)
       }
@@ -49,10 +50,7 @@ function reduser(state, action) {
         let need_folder = getNeedFolder(state, action)
         need_folder.childs.splice(action.delete_path , 1)
       }
-
-      console.log('DELETE_CHILD state', state)
-
-      // saveLibraryToJSON(state)
+      saveLibraryToJSON(state)
       return state
     }
     case 'RENAME': {
@@ -61,13 +59,17 @@ function reduser(state, action) {
       saveLibraryToJSON(state)
       return state
     }
+    case 'EDIT_NOTE_DESCRIPTION': {
+      let need_folder = getNeedFolder(state, action)
+      need_folder.description = action.description
+      saveLibraryToJSON(state)
+      return state
+    }
     default: return state
   }
 
 }
-
 const store = createStore(reduser, initialState)
-
 
 const RootStack = createStackNavigator(
   {
@@ -79,7 +81,9 @@ const RootStack = createStackNavigator(
     initialRouteName: 'Library',
     headerMode: 'none'
   },
-);
+)
+
+
 
 const AppContainer = createAppContainer(RootStack);
 

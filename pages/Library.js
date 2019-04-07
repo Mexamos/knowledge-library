@@ -1,11 +1,7 @@
 import React, {Component} from 'react'
 import { View, Text, TouchableOpacity, Image, Keyboard, TextInput, ScrollView, Dimensions } from 'react-native'
-
 import { checkJSONFile } from '../common_functions.js'
-
 import LinearGradient from 'react-native-linear-gradient'
-var objectPath = require("object-path")
-
 
 class Library extends Component {
 
@@ -16,7 +12,7 @@ class Library extends Component {
             text_input_height: 0,
             new_folder: '',
             check_JSON: false,
-            childs_indexes: ''
+            path_indexes: ''
         }
     }
 
@@ -26,13 +22,13 @@ class Library extends Component {
           this._keyboardDidHide.bind(this),
         )
     }
-
     componentWillUnmount() {
         this.keyboardDidHideListener.remove()
     }
-
     _keyboardDidHide() {
-        console.log('_keyboardDidHide')
+        const { navigation } = this.props
+        if(navigation.state.routeName !== '"Library"') return
+
         if(this.state.new_folder.length > 0) {
             this.addFolder(this.state.new_folder)
         }
@@ -40,7 +36,6 @@ class Library extends Component {
         this.state.text_input_height = 0
         this.forceUpdate()
     }
-
     addFolder (name) {
         this.props.screenProps.dispatch({
             type: 'ADD_CHILD', 
@@ -53,14 +48,13 @@ class Library extends Component {
         })
         this.forceUpdate()
     }
-
     editPathIndexes (action, index) {
         if(action === 'add') {
-            if(this.state.childs_indexes.length === 0) {
-                this.state.childs_indexes = `${index}`
+            if(this.state.path_indexes.length === 0) {
+                this.state.path_indexes = `${index}`
             }
             else {
-                this.state.childs_indexes += `.${index}`
+                this.state.path_indexes += `.${index}`
             }
         }
         else if(action === 'delete') {
@@ -69,14 +63,17 @@ class Library extends Component {
     }
 
     renderLibraryList (childs) {
-        let result = <View style={{width: '100%', height: '100%'}}><ScrollView>
+        var {height, width} = Dimensions.get('window')
+        let list_height = height - 85
+
+        let result = <View style={{width: '100%', height: list_height}}><ScrollView>
             {childs.map((child, index) => {
-                console.log('child', child)
+                let first_child_margin_top = index === 0 ? 10 : 0
                 if(child.type === 'folder') {
                 return(
                     <View 
                     key={index}
-                    style={{borderColor: '#07234f', borderWidth: 1, borderRadius: 1, height: 40, marginLeft: 10, marginRight: 5, marginTop: 10, flexDirection: 'row', paddingHorizontal: 5, paddingVertical: 5}}>
+                    style={{borderColor: '#150920', borderWidth: 1, borderRadius: 1, height: 40, marginLeft: 10, marginRight: 5, marginBottom: 10, marginTop: first_child_margin_top, flexDirection: 'row', paddingHorizontal: 5, paddingVertical: 5}}>
                         <TouchableOpacity
                         onPress={() => {
                             this.editPathIndexes('add', index)
@@ -93,10 +90,10 @@ class Library extends Component {
                             this.editPathIndexes('add', index)
                             this.props.navigation.navigate('EditFolder', {
                                 "select_item": child,
-                                "childs_indexes": this.state.childs_indexes
+                                "path_indexes": this.state.path_indexes
                             })
                         }}>
-                            <LinearGradient colors={['#0e4193', '#07234f']}
+                            <LinearGradient colors={['#351651', '#150920']}
                             style={{width: 30, height: 30, alignItems: 'center', borderRadius: 30}}>
                                 <Image
                                 style={{width: 14, height: 14, position: 'absolute', top: 8}}
@@ -111,8 +108,7 @@ class Library extends Component {
                     return(
                         <View 
                         key={index}
-                        style={{height: 40, marginLeft: 10, marginRight: 5, marginTop: 10, flexDirection: 'row', paddingVertical: 5}}>
-
+                        style={{height: 40, marginLeft: 10, marginRight: 5, marginBottom: 10, marginTop: first_child_margin_top, flexDirection: 'row', paddingVertical: 5}}>
 
                             <View
                             style={{width: 20, alignItems: 'center', justifyContent: 'center'}}>
@@ -123,14 +119,13 @@ class Library extends Component {
 
                             <TouchableOpacity
                             onPress={() => {
-    
-                                // console.log('this.state.childs_indexes', this.state.childs_indexes)
-                                // console.log('go to select folder')
-                                // this.editPathIndexes('add', index)
-    
-                                // this.forceUpdate()
+                                this.editPathIndexes('add', index)
+                                this.props.navigation.navigate('EditNote', {
+                                    "select_item": child,
+                                    "path_indexes": this.state.path_indexes
+                                })
                             }}
-                            style={{height: '100%', justifyContent: 'center', width: 325, borderColor: '#07234f', borderWidth: 1, borderRadius: 1, paddingLeft: 10}}>
+                            style={{height: '100%', justifyContent: 'center', width: 325, borderColor: '#150920', borderWidth: 1, borderRadius: 1, paddingLeft: 10}}>
                                 <Text style={{color: 'black'}}>
                                     {child.name}
                                 </Text>
@@ -143,7 +138,7 @@ class Library extends Component {
         </ScrollView></View>
         return result
     }
-    
+
     setInputRef = ref => {
         this.inputRef = ref;
         const { getRef } = this.props;
@@ -156,10 +151,9 @@ class Library extends Component {
 
         const { navigation } = this.props
 
-
         if(navigation.getParam('minus_path') && navigation.getParam('minus_path') !== -1) {
             navigation.state.params.minus_path = -1
-            this.state.childs_indexes = this.state.childs_indexes.slice(0, -2)
+            this.state.path_indexes = this.state.path_indexes.slice(0, -2)
         }
 
         const {
@@ -170,14 +164,12 @@ class Library extends Component {
             checkJSONFile.call(this)
         }
 
-
-
         let need_folder = this.props.screenProps.getState().library
         var return_button = <View></View>
         var add_button_size = 40
-
-        if(this.state.childs_indexes.length > 0) {
-            let indexes = this.state.childs_indexes.split('.')
+        this.state.add_folder_button = 1
+        if(this.state.path_indexes.length > 0) {
+            let indexes = this.state.path_indexes.split('.')
 
             indexes.forEach(function(index) {
                 need_folder = need_folder.childs[index]
@@ -186,11 +178,8 @@ class Library extends Component {
             return_button = <TouchableOpacity
                             style={{alignItems: 'center', justifyContent: 'center', width: 60, position: 'absolute', height: 60, zIndex: 2}}
                             onPress={() => {
-                                console.log('go back', )
-
-                                this.state.childs_indexes = this.state.childs_indexes.slice(0, -2)
+                                this.state.path_indexes = this.state.path_indexes.slice(0, -2)
                                 this.forceUpdate()
-                 
                             }}>
                             <Image
                             style={{width: 18, height: 18}}
@@ -198,6 +187,7 @@ class Library extends Component {
                             ></Image>
                         </TouchableOpacity>
             add_button_size = 0
+            this.state.add_folder_button = 0
         }
         need_folder = need_folder.childs
 
@@ -205,9 +195,9 @@ class Library extends Component {
 
         return (
             <View style={{ flex: 1, height: '100%'}}>
-                
+
                 <View>
-                    <LinearGradient colors={['#0e4193', '#07234f']} style={{height: 60}}>
+                    <LinearGradient colors={['#351651', '#150920']} style={{height: 60}}>
 
                         <View style={{justifyContent: 'center', height: 60}}>
                             <Text style={{color:'white', fontSize: 18, textAlign: 'center'}}>Library</Text>
@@ -218,18 +208,13 @@ class Library extends Component {
                         }
 
                     </LinearGradient>
-
                 </View>
 
-
                 <View>
-
                     {
                         render_library_list
                     }
-    
                 </View>
-
 
                 <TouchableOpacity style={{position: 'absolute', bottom: 20, right: 20, width: add_button_size, height: add_button_size}}
                 onPress={() => {
@@ -239,19 +224,14 @@ class Library extends Component {
                     this.inputRef.clear()
                     this.forceUpdate()
                     this.inputRef.focus()
-                    
                 }}
                 >
-
-                    <LinearGradient colors={['#0e4193', '#07234f']} style={{height: add_button_size, width: add_button_size, alignItems: 'center', justifyContent: 'center', borderRadius: 20, opacity: this.state.add_folder_button}}>
-                        
+                    <LinearGradient colors={['#351651', '#150920']} style={{height: add_button_size, width: add_button_size, alignItems: 'center', justifyContent: 'center', borderRadius: 20, opacity: this.state.add_folder_button}}>
                         <Image
-                        style={{width: 18, height: 18, position: 'absolute'}}
+                        style={{width: 18, height: 18, position: 'absolute', opacity: this.state.add_folder_button}}
                         source={require('../images/add.png')}
                         ></Image>
-
                     </LinearGradient>
-
                 </TouchableOpacity>
 
                 <TouchableOpacity style={{position: 'absolute', bottom: 0, width: '100%', height: this.state.text_input_height}}
@@ -259,8 +239,7 @@ class Library extends Component {
                     Keyboard.dismiss()
                 }}
                 >
-
-                    <LinearGradient colors={['#0e4193', '#07234f']} style={{ height: this.state.text_input_height, justifyContent: 'center'}}
+                    <LinearGradient colors={['#351651', '#150920']} style={{ height: this.state.text_input_height, justifyContent: 'center'}}
                     >
 
                         <TextInput
@@ -273,12 +252,11 @@ class Library extends Component {
                         />
 
                         <Image
-                        style={{width: 18, height: 18, position: 'absolute', right: 15, zIndex:10}}
+                        style={{width: 18, height: 18, position: 'absolute', right: 15, zIndex:10, opacity: this.state.add_folder_button}}
                         source={require('../images/forward-arrow.png')}
                         ></Image>
 
                     </LinearGradient>
-
                 </TouchableOpacity>
 
             </View>

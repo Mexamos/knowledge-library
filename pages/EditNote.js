@@ -1,38 +1,77 @@
 import React, {Component} from 'react'
-import { Button, View, Text, TouchableOpacity, Image, Keyboard, TextInput, ScrollView, FlatList } from 'react-native'
-import LinearGradient from 'react-native-linear-gradient';
+import { View, Text, TouchableOpacity, Image, TextInput, ScrollView, Dimensions } from 'react-native'
+import LinearGradient from 'react-native-linear-gradient'
 
 class EditNote extends Component {
 
-    // constructor(props) {
-    //     super(props)
-    //     this.state = {
-    //         new_folder: '',
-    //         new_note: '',
-    //         path: ''
-    //     }
-    // }
+    constructor(props) {
+        super(props)
+        this.state = {
+            path: '',
+            select_item: {
+                description:''
+            },
+            scroll_view_height: 0,
+            edit_description_mode: false,
+            description_element: <Text></Text>
+        }
+    }
 
-    renameFolder (name) {
+    renameNote (name) {
         this.props.screenProps.dispatch({
             type: 'RENAME', 
             name: name,
             path: this.state.path
         })
     }
+    editNoteDescription (description) {
+        this.props.screenProps.dispatch({
+            type: 'EDIT_NOTE_DESCRIPTION', 
+            description: description,
+            path: this.state.path
+        })
+    }
+    toggleEditDescriptionMode () {
+        this.state.edit_description_mode = this.state.edit_description_mode ? false : true
+        this.forceUpdate()
+    }
 
     render() {
+
+        const { navigation } = this.props
+        this.state.select_item = navigation.getParam('select_item')
+        this.state.path = navigation.getParam('path_indexes')
+
+        var {height, width} = Dimensions.get('window')
+        this.state.scroll_view_height = height - 135
+
+        if(this.state.edit_description_mode) {
+            this.state.description_element = <TextInput
+                                multiline={true}
+                                style={{width: '100%', height: this.state.scroll_view_height, paddingTop: 10, paddingHorizontal: 10, lineHeight: 20}}
+                                onChangeText={(text) => {
+                                    this.state.select_item.description = text
+                                }}>
+                                {this.state.select_item.description}
+                                </TextInput>
+        }
+        else {
+            this.state.description_element = <Text
+                                style={{width: '100%', paddingTop: 10, paddingHorizontal: 10, lineHeight: 20, color: 'black'}}
+                                >
+                                    {this.state.select_item.description}
+                                </Text>
+        }
 
         return (
             <View style={{ flex: 1, height: '100%'}}>
                 
-                {/* <View>
-                    <LinearGradient colors={['#0e4193', '#07234f']} style={{height: 60, flexDirection: 'row'}}>
+                <View>
+                    <LinearGradient colors={['#351651', '#150920']} style={{height: 60, flexDirection: 'row'}}>
 
                         <TouchableOpacity
                         style={{alignItems: 'center', justifyContent: 'center', width: 40}}
                         onPress={() => {
-                            console.log('go back', this.state.path)
                             this.props.navigation.navigate('Library', {
                                 'minus_path': this.state.path
                             })
@@ -43,24 +82,17 @@ class EditNote extends Component {
                             ></Image>
                         </TouchableOpacity>
 
-                
                         <View style={{justifyContent: 'center', height: 60, paddingLeft: 10}}>
                             <Text style={{color:'white', fontSize: 18}}>
-                                Edit {select_item.name}
+                                Edit {this.state.select_item.name}
                             </Text>
                         </View>
 
                         <TouchableOpacity
                         style={{alignItems: 'center', justifyContent: 'center', width: 60, height: 60, right: 0, top: 0, position: 'absolute'}}
                         onPress={() => {
-                            console.log('select_item', select_item)
-                            if(this.state.new_folder.length !== 0) {
-                                this.addFolder(this.state.new_folder)
-                            }
-                            if(this.state.new_note.length !== 0) {
-                                this.addNote(this.state.new_note)
-                            }
-                            this.renameFolder(select_item.name)
+                            this.editNoteDescription(this.state.select_item.description)
+                            this.renameNote(this.state.select_item.name)
                             this.forceUpdate()
                         }}>
                             <Image
@@ -74,75 +106,32 @@ class EditNote extends Component {
 
 
                 <View
-                style={{width: '100%', justifyContent: 'center', alignItems: 'center', marginBottom: 10}}>
-
+                style={{width: '100%', justifyContent: 'center', alignItems: 'center', borderBottomColor: '#351651', borderBottomWidth: 1}}>
                     <TextInput
                     style={{textAlign: 'center', width: '100%'}}
-                    onChangeText={(text) => select_item.name = text}>
-                        {select_item.name}
+                    onChangeText={(text) => this.state.select_item.name = text}>
+                        {this.state.select_item.name}
                     </TextInput>
-    
                 </View>
 
+                <ScrollView>
+                    {
+                        this.state.description_element
+                    }
+                </ScrollView>
 
-                <View
-                style={{flexDirection: 'column', justifyContent: 'space-around', height: 200, paddingHorizontal: 20, borderColor: 'green', borderWidth: 1}}>
-
-                    <TouchableOpacity
-                    style={{flexDirection: 'row', alignItems: 'center'}}
-                    >
-                        <LinearGradient colors={['#0e4193', '#07234f']} style={{height: 40, width: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginRight: 30}}>
-                            <Image
-                            style={{width: 18, height: 18}}
-                            source={require('../images/add-folder.png')}
-                            ></Image>
-                        </LinearGradient>
-
-                        <TextInput
-                        placeholder="Add folder"
-                        style={{textAlign: 'center', width: 250, borderBottomColor: '#0e4193', borderBottomWidth: 1}}
-                        onChangeText={(text) => this.state.new_folder = text}
-                        />
-
-
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                    style={{flexDirection: 'row', alignItems: 'center'}}
-                    >
-
-                        <LinearGradient colors={['#0e4193', '#07234f']} style={{height: 40, width: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginRight: 30}}>
-                            <Image
-                            style={{width: 18, height: 18}}
-                            source={require('../images/add-note.png')}
-                            ></Image>
-                        </LinearGradient>
-
-                        <TextInput
-                        placeholder="Add note"
-                        style={{textAlign: 'center', width: 250, borderBottomColor: '#0e4193', borderBottomWidth: 1}}
-                        onChangeText={(text) => this.state.new_note = text}
-                        />
-
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                    style={{width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20}}
-                    >
-
-                    <LinearGradient colors={['#0e4193', '#07234f']} style={{height: 40, width: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center'}}>
-
+                <TouchableOpacity style={{position: 'absolute', bottom: 20, right: 20, width: 40, height: 40}}
+                onPress={() => {
+                    this.toggleEditDescriptionMode.call(this)
+                }}
+                >
+                    <LinearGradient colors={['#351651', '#150920']} style={{height: 40, width: 40, alignItems: 'center', justifyContent: 'center', borderRadius: 20}}>
                         <Image
-                        style={{width: 15, height: 15}}
-                        source={require('../images/delete.png')}
+                        style={{width: 18, height: 18, position: 'absolute'}}
+                        source={require('../images/edit.png')}
                         ></Image>
-
                     </LinearGradient>
-
-
-                    </TouchableOpacity>
-
-                </View> */}
+                </TouchableOpacity>
 
             </View>
         )
