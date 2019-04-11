@@ -12,7 +12,8 @@ class Library extends Component {
             text_input_height: 0,
             new_folder: '',
             check_JSON: false,
-            path_indexes: ''
+            path_indexes: '',
+            input_opacity: 0
         }
     }
 
@@ -27,8 +28,9 @@ class Library extends Component {
     }
     _keyboardDidHide() {
         const { navigation } = this.props
-        if(navigation.state.routeName !== '"Library"') return
-
+        console.log('navigation', navigation.state.routeName)
+        if(navigation.state.routeName !== 'Library') return
+        console.log('this.state', this.state)
         if(this.state.new_folder.length > 0) {
             this.addFolder(this.state.new_folder)
         }
@@ -167,7 +169,9 @@ class Library extends Component {
         let need_folder = this.props.screenProps.getState().library
         var return_button = <View></View>
         var add_button_size = 40
-        this.state.add_folder_button = 1
+        if(this.state.text_input_height !== 40) {
+            this.state.add_folder_button = 1
+        }
         if(this.state.path_indexes.length > 0) {
             let indexes = this.state.path_indexes.split('.')
 
@@ -219,6 +223,7 @@ class Library extends Component {
                 <TouchableOpacity style={{position: 'absolute', bottom: 20, right: 20, width: add_button_size, height: add_button_size}}
                 onPress={() => {
                     this.state.add_folder_button = 0
+                    this.state.input_opacity = 1
                     this.state.text_input_height = 40
                     this.state.new_folder = ''
                     this.inputRef.clear()
@@ -252,7 +257,7 @@ class Library extends Component {
                         />
 
                         <Image
-                        style={{width: 18, height: 18, position: 'absolute', right: 15, zIndex:10, opacity: this.state.add_folder_button}}
+                        style={{width: 18, height: 18, position: 'absolute', right: 15, zIndex:10, opacity: this.state.input_opacity}}
                         source={require('../images/forward-arrow.png')}
                         ></Image>
 

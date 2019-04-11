@@ -1,14 +1,31 @@
 var RNFS = require('react-native-fs')
-var path = RNFS.ExternalStorageDirectoryPath + '/Fukurokuju.json';
+var path = RNFS.ExternalStorageDirectoryPath + '/Fukurokuju.json'
+
+import {PermissionsAndroid} from 'react-native'
+
+async function requestExternalStoragePermission(state) {
+  try {
+    const granted = await PermissionsAndroid.request( PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE )
+
+    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+
+      RNFS.writeFile(path, JSON.stringify(state), 'utf8')
+        .then(() => {
+            console.log('FILE WRITTEN!')
+        })
+        .catch((err) => {
+            console.log(err.message)
+        })
+
+    }
+  } catch (err) {
+    console.warn(err)
+  }
+}
+
 
 let saveLibraryToJSON = function (state) {
-    RNFS.writeFile(path, JSON.stringify(state), 'utf8')
-    .then(() => {
-      console.log('FILE WRITTEN!')
-    })
-    .catch((err) => {
-      console.log(err.message)
-    })
+    requestExternalStoragePermission(state)
 }
 
 function checkJSONFile () {
