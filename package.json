@@ -11,6 +11,7 @@
     "react": "16.8.3",
     "react-native": "0.59.1",
     "react-native-autofocus": "0.0.7",
+    "react-native-easy-gestures": "^2.2.4",
     "react-native-exception-handler": "^2.10.7",
     "react-native-fs": "^2.13.3",
     "react-native-gesture-handler": "^1.1.0",

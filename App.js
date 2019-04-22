@@ -5,6 +5,8 @@ import Library from './pages/Library'
 import EditFolder from './pages/EditFolder'
 import EditNote from './pages/EditNote'
 
+import ErrorBoundary from "./pages/ErrorBoundary"
+
 import { createStore } from 'redux'
 import { saveLibraryToJSON } from './common_functions.js'
 
@@ -89,6 +91,10 @@ const AppContainer = createAppContainer(RootStack);
 
 export default class App extends Component {
   render() {
-    return <AppContainer screenProps={store} />
+    return (
+      <ErrorBoundary>
+        <AppContainer screenProps={store} />
+      </ErrorBoundary>
+    )
   }
 }

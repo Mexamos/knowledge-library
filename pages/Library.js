@@ -3,6 +3,9 @@ import { View, Text, TouchableOpacity, Image, Keyboard, TextInput, ScrollView, D
 import { checkJSONFile } from '../common_functions.js'
 import LinearGradient from 'react-native-linear-gradient'
 
+import Gestures from 'react-native-easy-gestures'
+import Draggable from "./Draggable";
+
 class Library extends Component {
 
     constructor(props) {
@@ -73,8 +76,23 @@ class Library extends Component {
                 let first_child_margin_top = index === 0 ? 10 : 0
                 if(child.type === 'folder') {
                 return(
-                    <View 
+
+                    <Gestures
                     key={index}
+                    scalable={false}
+                    rotatable={false}
+                    onStart={(event, styles) => {
+                        console.log('onStart this.gestures', this.gestures)
+                    }}
+                    ref={(c) => { this.gestures = c; }}
+                    onEnd={(event, styles) => {
+                        console.log('onEnd this.gestures', this.gestures)
+                        // this.gestures.reset(()=>{})
+                    }}
+                    >
+
+                    <View 
+                    
                     style={{borderColor: '#150920', borderWidth: 1, borderRadius: 1, height: 40, marginLeft: 10, marginRight: 5, marginBottom: 10, marginTop: first_child_margin_top, flexDirection: 'row', paddingHorizontal: 5, paddingVertical: 5}}>
                         <TouchableOpacity
                         onPress={() => {
@@ -104,6 +122,8 @@ class Library extends Component {
                             </LinearGradient>
                         </TouchableOpacity>
                     </View>
+
+                </Gestures>
                 )
                 }
                 else {
