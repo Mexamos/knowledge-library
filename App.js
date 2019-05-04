@@ -18,8 +18,8 @@ const initialState = {
 
 function reduser(state, action) {
 
-  function getNeedFolder (state, action) {
-    let path = action.path.split('.')
+  function getNeedFolder (state, path_string) {
+    let path = path_string.split('.')
     let need_folder = state.library
 
     for(let i = 0, length = path.length; i < length; i++) {
@@ -38,7 +38,7 @@ function reduser(state, action) {
         state.library.childs.push(action.child)
       }
       else {
-        let need_folder = getNeedFolder(state, action)
+        let need_folder = getNeedFolder(state, action.path)
         need_folder.childs.push(action.child)
       }
       saveLibraryToJSON(state)
@@ -49,22 +49,45 @@ function reduser(state, action) {
         state.library.childs.splice(action.delete_path , 1)
       }
       else {
-        let need_folder = getNeedFolder(state, action)
+        let need_folder = getNeedFolder(state, action.path)
         need_folder.childs.splice(action.delete_path , 1)
       }
       saveLibraryToJSON(state)
       return state
     }
     case 'RENAME': {
-      let need_folder = getNeedFolder(state, action)
+      let need_folder = getNeedFolder(state, action.path)
       need_folder.name = action.name
       saveLibraryToJSON(state)
       return state
     }
     case 'EDIT_NOTE_DESCRIPTION': {
-      let need_folder = getNeedFolder(state, action)
+      let need_folder = getNeedFolder(state, action.path)
       need_folder.description = action.description
       saveLibraryToJSON(state)
+      return state
+    }
+    case 'MOVE': {
+      let selected_folder = getNeedFolder(state, action.selected_path)
+
+      if(action.target.length === 0) {
+        state.library.childs.push(selected_folder)
+      }
+      else {
+        let new_folder_parent = getNeedFolder(state, action.target)
+        new_folder_parent.childs.push(selected_folder)
+      }
+
+      if(action.parent_path.length === 0) {
+        state.library.childs.splice(action.selected_path, 1)
+      }
+      else {
+        let need_folder = getNeedFolder(state, action.parent_path)
+        need_folder.childs.splice(action.selected_path.slice(-1), 1)
+      }
+
+      saveLibraryToJSON(state)
+
       return state
     }
     default: return state

@@ -56,6 +56,12 @@ class EditFolder extends Component {
             'minus_path': this.state.path
         })
     }
+    moveFolder () {
+        this.props.navigation.navigate('Library', {
+            'minus_path': this.state.path,
+            'move': true
+        })
+    }
 
     render() {
 
@@ -161,8 +167,22 @@ class EditFolder extends Component {
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                    style={{width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20}}
+                    style={{width: '100%', alignItems: 'center', justifyContent: 'center', marginTop: 20, flexDirection: 'row'}}
                     >
+
+                        <TouchableOpacity
+                        style={{marginRight: 20}}
+                        onPress={() => {
+                            this.moveFolder()
+                        }}>
+                            <LinearGradient colors={['#351651', '#150920']} style={{height: 40, width: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center'}}>
+                                <Image
+                                style={{width: 25, height: 25}}
+                                source={require('../images/move.png')}
+                                ></Image>
+                            </LinearGradient>
+                        </TouchableOpacity>
+
                         <TouchableOpacity
                         onPress={() => {
                             this.deleteFolder()
@@ -174,6 +194,8 @@ class EditFolder extends Component {
                                 ></Image>
                             </LinearGradient>
                         </TouchableOpacity>
+
+                        
                     </TouchableOpacity>
 
                 </View>

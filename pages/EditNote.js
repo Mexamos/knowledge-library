@@ -36,6 +36,20 @@ class EditNote extends Component {
         this.forceUpdate()
     }
 
+    setInputRef = ref => {
+        this.inputRef = ref
+        const { getRef } = this.props
+        if (getRef) {
+            getRef(ref)
+        }
+    }
+
+    componentDidUpdate () {
+        if(this.inputRef) {
+            this.inputRef.focus()
+        }
+    }
+
     render() {
 
         const { navigation } = this.props
@@ -45,10 +59,16 @@ class EditNote extends Component {
         var {height, width} = Dimensions.get('window')
         this.state.scroll_view_height = height - 135
 
+        const {
+            nextField
+        } = this.props
+
         if(this.state.edit_description_mode) {
             this.state.description_element = <TextInput
                                 multiline={true}
                                 style={{width: '100%', height: this.state.scroll_view_height, paddingTop: 10, paddingHorizontal: 10, lineHeight: 20}}
+                                onSubmitEditing={() => nextField && nextField.focus()}
+                                ref={this.setInputRef}
                                 onChangeText={(text) => {
                                     this.state.select_item.description = text
                                 }}>

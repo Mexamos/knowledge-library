@@ -3,9 +3,6 @@ import { View, Text, TouchableOpacity, Image, Keyboard, TextInput, ScrollView, D
 import { checkJSONFile } from '../common_functions.js'
 import LinearGradient from 'react-native-linear-gradient'
 
-import Gestures from 'react-native-easy-gestures'
-import Draggable from "./Draggable";
-
 class Library extends Component {
 
     constructor(props) {
@@ -16,7 +13,9 @@ class Library extends Component {
             new_folder: '',
             check_JSON: false,
             path_indexes: '',
-            input_opacity: 0
+            input_opacity: 0,
+            move_element_height: 0,
+            path_to_move: null
         }
     }
 
@@ -31,9 +30,7 @@ class Library extends Component {
     }
     _keyboardDidHide() {
         const { navigation } = this.props
-        console.log('navigation', navigation.state.routeName)
         if(navigation.state.routeName !== 'Library') return
-        console.log('this.state', this.state)
         if(this.state.new_folder.length > 0) {
             this.addFolder(this.state.new_folder)
         }
@@ -77,22 +74,9 @@ class Library extends Component {
                 if(child.type === 'folder') {
                 return(
 
-                    <Gestures
-                    key={index}
-                    scalable={false}
-                    rotatable={false}
-                    onStart={(event, styles) => {
-                        console.log('onStart this.gestures', this.gestures)
-                    }}
-                    ref={(c) => { this.gestures = c; }}
-                    onEnd={(event, styles) => {
-                        console.log('onEnd this.gestures', this.gestures)
-                        // this.gestures.reset(()=>{})
-                    }}
-                    >
 
                     <View 
-                    
+                    key={index}
                     style={{borderColor: '#150920', borderWidth: 1, borderRadius: 1, height: 40, marginLeft: 10, marginRight: 5, marginBottom: 10, marginTop: first_child_margin_top, flexDirection: 'row', paddingHorizontal: 5, paddingVertical: 5}}>
                         <TouchableOpacity
                         onPress={() => {
@@ -108,6 +92,7 @@ class Library extends Component {
                         style={{position: 'absolute', right: 10, top: 5}}
                         onPress={() => {
                             this.editPathIndexes('add', index)
+                            this.componentWillUnmount()
                             this.props.navigation.navigate('EditFolder', {
                                 "select_item": child,
                                 "path_indexes": this.state.path_indexes
@@ -123,7 +108,6 @@ class Library extends Component {
                         </TouchableOpacity>
                     </View>
 
-                </Gestures>
                 )
                 }
                 else {
@@ -142,6 +126,7 @@ class Library extends Component {
                             <TouchableOpacity
                             onPress={() => {
                                 this.editPathIndexes('add', index)
+                                this.componentWillUnmount()
                                 this.props.navigation.navigate('EditNote', {
                                     "select_item": child,
                                     "path_indexes": this.state.path_indexes
@@ -162,10 +147,10 @@ class Library extends Component {
     }
 
     setInputRef = ref => {
-        this.inputRef = ref;
-        const { getRef } = this.props;
+        this.inputRef = ref
+        const { getRef } = this.props
         if (getRef) {
-            getRef(ref);
+            getRef(ref)
         }
     }
 
@@ -174,6 +159,14 @@ class Library extends Component {
         const { navigation } = this.props
 
         if(navigation.getParam('minus_path') && navigation.getParam('minus_path') !== -1) {
+
+            if(navigation.getParam('move')) {
+                navigation.state.params.move = null
+                this.state.move_element_height = 50
+                this.state.path_to_move = navigation.getParam('minus_path')
+                this.state.parent_path_to_move = this.state.path_indexes.slice(0, -2)
+            }
+
             navigation.state.params.minus_path = -1
             this.state.path_indexes = this.state.path_indexes.slice(0, -2)
         }
@@ -240,7 +233,7 @@ class Library extends Component {
                     }
                 </View>
 
-                <TouchableOpacity style={{position: 'absolute', bottom: 20, right: 20, width: add_button_size, height: add_button_size}}
+                <TouchableOpacity style={{position: 'absolute', top: 10, right: 20, width: add_button_size, height: add_button_size}}
                 onPress={() => {
                     this.state.add_folder_button = 0
                     this.state.input_opacity = 1
@@ -251,11 +244,49 @@ class Library extends Component {
                     this.inputRef.focus()
                 }}
                 >
-                    <LinearGradient colors={['#351651', '#150920']} style={{height: add_button_size, width: add_button_size, alignItems: 'center', justifyContent: 'center', borderRadius: 20, opacity: this.state.add_folder_button}}>
+                    <LinearGradient colors={['#351651', '#150920']} style={{height: add_button_size, width: add_button_size, alignItems: 'center', justifyContent: 'center', opacity: this.state.add_folder_button,borderRadius: 40, borderColor: 'white', borderWidth: 1.5 }}>
                         <Image
                         style={{width: 18, height: 18, position: 'absolute', opacity: this.state.add_folder_button}}
                         source={require('../images/add.png')}
                         ></Image>
+                    </LinearGradient>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                style={{position: 'absolute', bottom: 0, width: '100%', height: this.state.move_element_height}}>
+                    <LinearGradient colors={['#150920', '#351651']} style={{width: '100%', height: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around'}}>
+
+                        <TouchableOpacity
+                        style={{padding: 10}}
+                        onPress={() => {
+                            this.props.screenProps.dispatch({
+                                type: 'MOVE',
+                                parent_path: this.state.parent_path_to_move,
+                                selected_path: this.state.path_to_move,
+                                target: this.state.path_indexes
+                            })
+                            this.state.move_element_height = 0
+                            this.state.path_indexes = ''
+                            this.forceUpdate()
+                        }}
+                        >
+                            <Text
+                            style={{color: 'white'}}
+                            >Move here</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                        style={{padding: 10}}
+                        onPress={() => {
+                            this.state.move_element_height = 0
+                            this.forceUpdate()
+                        }}
+                        >
+                            <Text
+                            style={{color: 'white'}}
+                            >Cancel</Text>
+                        </TouchableOpacity>
+
                     </LinearGradient>
                 </TouchableOpacity>
 
